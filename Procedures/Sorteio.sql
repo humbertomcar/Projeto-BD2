@@ -1,40 +1,32 @@
 USE Restaurante;
 
--- dados para teste
-INSERT INTO cliente (nome, sexo, idade, nascimento, pontos)
-VALUES
-    ('João', 'm', 28, '1996-01-15', 0),
-    ('Maria', 'f', 34, '1990-05-22', 0),
-    ('Pedro', 'm', 45, '1979-09-10', 0);
-
 DELIMITER $$
 
 CREATE PROCEDURE Sorteio()
 BEGIN
     DECLARE cliente_id INT;
 
-    --   cliente random
-SELECT id INTO cliente_id
+    -- =pega um cliente aleatório
+SELECT id_cliente INTO cliente_id
 FROM cliente
 ORDER BY RAND()
     LIMIT 1;
 
--- att os pontos do cliente sorteado
+-- att os pontos do cliente sorteado com 100 pontos de premiação
 UPDATE cliente
 SET pontos = pontos + 100
-WHERE id = cliente_id;
+WHERE id_cliente = cliente_id;
 
--- exibe o cliente sorteado
-SELECT nome, pontos
+-- exibe o cliente sorteado e o novo saldo de pontos
+SELECT nome AS "Cliente Sorteado", pontos AS "Pontos Atualizados"
 FROM cliente
-WHERE id = cliente_id;
-
+WHERE id_cliente = cliente_id;
 END$$
 
 DELIMITER ;
 
--- teste
+-- test do procedimento Sorteio
 CALL Sorteio();
 
--- ve os pontos dos clientes depossi
+-- ve os pontos dos clientes após o sorteio
 SELECT * FROM cliente;
