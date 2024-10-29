@@ -1,101 +1,178 @@
 USE Restaurante;
--- inserindo valores para teste
-INSERT INTO cliente (nome, sexo, idade, nascimento, pontos)
-VALUES 
-('João', 'm', 28, '1996-01-15', 0),
-('Maria', 'f', 34, '1990-05-22', 0),
-('Pedro', 'm', 45, '1979-09-10', 0);
 
--- inserindo valores para teste
-INSERT INTO prato (nome, descricao, valor, disponibilidade)
-VALUES 
-('Lasanha', 'Lasanha de carne', 30.00, TRUE),
-('Pizza', 'Pizza de quatro queijos', 25.00, TRUE),
-('Salada', 'Salada Caesar', 15.00, TRUE);
+-- INSERTS PARA TESTES 
 
--- Inserindo vendas (com diferentes pratos, quantidades e datas)
-INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor)
-VALUES 
--- Vendas da Lasanha
-(1, 1, 10, '2024-01-15', '12:30:00', 30.00),  -- Janeiro
-(2, 1, 5, '2024-02-15', '13:00:00', 30.00),   -- Fevereiro
-(3, 1, 20, '2024-03-15', '14:00:00', 30.00),  -- Março
+-- Tabela cliente
+INSERT INTO cliente (nome, sexo, idade, nascimento, pontos) VALUES
+('Carlos', 'm', 32, '1991-05-15', 100),
+('Ana', 'f', 28, '1995-08-24', 200);
+
+-- Tabela prato
+INSERT INTO prato (nome, descricao, valor, disponibilidade) VALUES
+('Pizza', 'Pizza de queijo com orégano', 30.00, TRUE),
+('Hamburguer', 'Hamburguer de carne com queijo', 25.00, TRUE),
+('Salada', 'Salada de folhas e legumes frescos', 15.00, TRUE);
+
+-- Tabela fornecedor
+INSERT INTO fornecedor (nome, estado_origem) VALUES
+('Fornecedor SP', 'SP'),
+('Fornecedor RJ', 'RJ');
+
+-- Tabela ingredientes
+INSERT INTO ingredientes (nome, data_fabricacao, data_validade, quantidade, observacao) VALUES
+('Queijo', '2024-01-01', '2025-01-01', 50, 'Queijo fresco'),
+('Carne', '2024-02-01', '2024-12-01', 30, 'Carne moída'),
+('Folhas', '2024-01-10', '2024-03-10', 20, 'Folhas verdes frescas');
+
+-- Tabela usos
+INSERT INTO usos (id_prato, id_ingrediente) VALUES
+(1, 1), -- Pizza usa Queijo
+(2, 2), -- Hamburguer usa Carne
+(3, 3); -- Salada usa Folhas
 
 -- Vendas da Pizza
-(1, 2, 7, '2024-01-10', '12:45:00', 25.00),   -- Janeiro
-(2, 2, 3, '2024-02-20', '12:50:00', 25.00),   -- Fevereiro
+INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor) VALUES
+(1, 1, 10, '2024-01-15', '12:30:00', 300.00), -- Janeiro
+(1, 1, 5, '2024-02-10', '13:45:00', 150.00), -- Fevereiro
+(1, 1, 20, '2024-03-05', '14:30:00', 600.00); -- Março
+
+-- Vendas do Hamburguer
+INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor) VALUES
+(2, 2, 15, '2024-01-20', '15:00:00', 375.00), -- Janeiro
+(2, 2, 7, '2024-02-15', '16:30:00', 175.00), -- Fevereiro
+(2, 2, 3, '2024-03-18', '17:00:00', 75.00); -- Março
+
 
 -- Vendas da Salada
-(1, 3, 2, '2024-01-20', '13:00:00', 15.00),   -- Janeiro
-(2, 3, 1, '2024-02-25', '13:15:00', 15.00),   -- Fevereiro
-(3, 3, 4, '2024-03-18', '13:45:00', 15.00);   -- Março
+INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor) VALUES
+(1, 3, 2, '2024-01-22', '18:00:00', 30.00),  -- Janeiro
+(1, 3, 8, '2024-02-25', '19:30:00', 120.00), -- Fevereiro
+(1, 3, 4, '2024-03-12', '20:00:00', 60.00);  -- Março
 
-
-DELIMITER $$
+-- PROCEDURE ESTATISTICAS
+DELIMITER //
 
 CREATE PROCEDURE Estatisticas_Vendas()
 BEGIN
+    DECLARE produto_mais_vendido INT;
+    DECLARE produto_menos_vendido INT;
+
+    -- criando uma tabela temporária para armazenar todos os resultados sem ela nao seria possivel exibir todos os resultados
+    CREATE TEMPORARY TABLE IF NOT EXISTS resultado_estatisticas (
+        descricao VARCHAR(255),
+        valor VARCHAR(255)
+    );
+
     -- Produto mais vendido
-    SELECT p.nome AS 'Produto mais vendido'
-    FROM venda v
-    JOIN prato p ON v.id_prato = p.id
-    GROUP BY v.id_prato
-    ORDER BY SUM(v.quantidade) DESC
+    SELECT id_prato INTO produto_mais_vendido
+    FROM venda
+    GROUP BY id_prato
+    ORDER BY SUM(quantidade) DESC
     LIMIT 1;
 
     -- Produto menos vendido
-    SELECT p.nome AS 'Produto menos vendido'
-    FROM venda v
-    JOIN prato p ON v.id_prato = p.id
-    GROUP BY v.id_prato
-    ORDER BY SUM(v.quantidade) ASC
+    SELECT id_prato INTO produto_menos_vendido
+    FROM venda
+    GROUP BY id_prato
+    ORDER BY SUM(quantidade) ASC
     LIMIT 1;
+
+    -- Produto mais vendido (nome)
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Produto mais vendido', p.nome
+    FROM prato p
+    WHERE p.id_prato = produto_mais_vendido;
+
+    -- Vendedor associado ao produto mais vendido
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Vendedor associado ao produto mais vendido', c.nome
+    FROM venda v
+    JOIN cliente c ON v.id_cliente = c.id_cliente
+    WHERE v.id_prato = produto_mais_vendido
+    GROUP BY c.nome
+    ORDER BY SUM(v.quantidade) DESC
+    LIMIT 1;
+
+    -- Produto menos vendido (nome)
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Produto menos vendido', p.nome
+    FROM prato p
+    WHERE p.id_prato = produto_menos_vendido;
 
     -- Valor ganho com o produto mais vendido
-    SELECT SUM(v.quantidade * v.valor) AS 'Valor ganho com o produto mais vendido'
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Valor ganho com o produto mais vendido', SUM(v.valor)
     FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) DESC LIMIT 1);
+    WHERE v.id_prato = produto_mais_vendido;
+
+    -- Mês de maior venda do produto mais vendido
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Mês de maior venda do produto mais vendido', MONTH(dia)
+    FROM venda
+    WHERE id_prato = produto_mais_vendido
+    GROUP BY MONTH(dia)
+    ORDER BY SUM(quantidade) DESC
+    LIMIT 1;
+
+    -- Mês de menor venda do produto mais vendido
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Mês de menor venda do produto mais vendido', MONTH(dia)
+    FROM venda
+    WHERE id_prato = produto_mais_vendido
+    GROUP BY MONTH(dia)
+    ORDER BY SUM(quantidade) ASC
+    LIMIT 1;
 
     -- Valor ganho com o produto menos vendido
-    SELECT SUM(v.quantidade * v.valor) AS 'Valor ganho com o produto menos vendido'
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Valor ganho com o produto menos vendido', SUM(v.valor)
     FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) ASC LIMIT 1);
+    WHERE v.id_prato = produto_menos_vendido;
 
-    -- Mês de maior vendas do produto mais vendido
-    SELECT MONTH(v.dia) AS 'Mês de maior vendas do produto mais vendido'
-    FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) DESC LIMIT 1)
-    GROUP BY MONTH(v.dia)
-    ORDER BY SUM(v.quantidade) DESC
+    -- Mês de maior venda do produto menos vendido
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Mês de maior venda do produto menos vendido', MONTH(dia)
+    FROM venda
+    WHERE id_prato = produto_menos_vendido
+    GROUP BY MONTH(dia)
+    ORDER BY SUM(quantidade) DESC
     LIMIT 1;
 
-    -- Mês de menor vendas do produto mais vendido
-    SELECT MONTH(v.dia) AS 'Mês de menor vendas do produto mais vendido'
-    FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) DESC LIMIT 1)
-    GROUP BY MONTH(v.dia)
-    ORDER BY SUM(v.quantidade) ASC
+    -- Mês de menor venda do produto menos vendido
+    INSERT INTO resultado_estatisticas (descricao, valor)
+    SELECT 'Mês de menor venda do produto menos vendido', MONTH(dia)
+    FROM venda
+    WHERE id_prato = produto_menos_vendido
+    GROUP BY MONTH(dia)
+    ORDER BY SUM(quantidade) ASC
     LIMIT 1;
 
-    -- Mês de maior vendas do produto menos vendido
-    SELECT MONTH(v.dia) AS 'Mês de maior vendas do produto menos vendido'
-    FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) ASC LIMIT 1)
-    GROUP BY MONTH(v.dia)
-    ORDER BY SUM(v.quantidade) DESC
-    LIMIT 1;
+    SELECT * FROM resultado_estatisticas;
 
-    -- Mês de menor vendas do produto menos vendido
-    SELECT MONTH(v.dia) AS 'Mês de menor vendas do produto menos vendido'
-    FROM venda v
-    WHERE v.id_prato = (SELECT v2.id_prato FROM venda v2 GROUP BY v2.id_prato ORDER BY SUM(v2.quantidade) ASC LIMIT 1)
-    GROUP BY MONTH(v.dia)
-    ORDER BY SUM(v.quantidade) ASC
-    LIMIT 1;
-END$$
+    -- Limpando a tabela temporária
+    DROP TEMPORARY TABLE resultado_estatisticas;
+END //
 
 DELIMITER ;
 
+DROP PROCEDURE Estatisticas_Vendas;
+
 CALL Estatisticas_Vendas();
 
+-- Tabela cliente
+SELECT * FROM cliente;
 
+-- Tabela prato
+SELECT * FROM prato;
+
+-- Tabela fornecedor
+SELECT * FROM fornecedor;
+
+-- Tabela ingredientes
+SELECT * FROM ingredientes;
+
+-- Tabela usos (relações entre prato e ingrediente)
+SELECT * FROM usos;
+
+-- Tabela venda
+SELECT * FROM venda;
