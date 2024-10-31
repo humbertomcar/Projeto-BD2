@@ -85,7 +85,7 @@ BEGIN
 
     -- Vendedor associado ao produto mais vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Vendedor associado ao produto mais vendido', c.nome
+    SELECT 'Vendedor do produto mais vendido', c.nome
     FROM venda v
     JOIN cliente c ON v.id_cliente = c.id_cliente
     WHERE v.id_prato = produto_mais_vendido
@@ -101,13 +101,13 @@ BEGIN
 
     -- Valor ganho com o produto mais vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Valor ganho com o produto mais vendido', SUM(v.valor)
+    SELECT 'Valor ganho com o mais vendido', SUM(v.valor)
     FROM venda v
     WHERE v.id_prato = produto_mais_vendido;
 
     -- Mês de maior venda do produto mais vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Mês de maior venda do produto mais vendido', MONTH(dia)
+    SELECT 'Mês de maior venda do mais vendido', MONTH(dia)
     FROM venda
     WHERE id_prato = produto_mais_vendido
     GROUP BY MONTH(dia)
@@ -116,7 +116,7 @@ BEGIN
 
     -- Mês de menor venda do produto mais vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Mês de menor venda do produto mais vendido', MONTH(dia)
+    SELECT 'Mês de menor venda do mais vendido', MONTH(dia)
     FROM venda
     WHERE id_prato = produto_mais_vendido
     GROUP BY MONTH(dia)
@@ -125,13 +125,13 @@ BEGIN
 
     -- Valor ganho com o produto menos vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Valor ganho com o produto menos vendido', SUM(v.valor)
+    SELECT 'Valor ganho com o menos vendido', SUM(v.valor)
     FROM venda v
     WHERE v.id_prato = produto_menos_vendido;
 
     -- Mês de maior venda do produto menos vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Mês de maior venda do produto menos vendido', MONTH(dia)
+    SELECT 'Mês de maior venda do menos vendido', MONTH(dia)
     FROM venda
     WHERE id_prato = produto_menos_vendido
     GROUP BY MONTH(dia)
@@ -140,7 +140,7 @@ BEGIN
 
     -- Mês de menor venda do produto menos vendido
     INSERT INTO resultado_estatisticas (descricao, valor)
-    SELECT 'Mês de menor venda do produto menos vendido', MONTH(dia)
+    SELECT 'Mês de menor venda do menos vendido', MONTH(dia)
     FROM venda
     WHERE id_prato = produto_menos_vendido
     GROUP BY MONTH(dia)
@@ -148,14 +148,12 @@ BEGIN
     LIMIT 1;
 
     SELECT * FROM resultado_estatisticas;
-
+	
     -- Limpando a tabela temporária
     DROP TEMPORARY TABLE resultado_estatisticas;
 END //
 
 DELIMITER ;
-
-DROP PROCEDURE Estatisticas_Vendas;
 
 CALL Estatisticas_Vendas();
 
