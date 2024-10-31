@@ -1,6 +1,6 @@
 import mysql.connector
-from Query.Queries import Queries as q
-from Insert.DefaultInsert import DefaultInsert
+from Query.Queries import Queries
+from Insert.DefaultInsert import DefaultInsert as di
 
 class Integration:
 
@@ -18,24 +18,30 @@ class Integration:
     
     else:
 
-        defaultCur = db.cursor()
-        defaultCur.execute(q.useDatabase)
-        defaultCur.execute(DefaultInsert.insertDefault(), multi=True)
-        defaultCur.close()
         cur = db.cursor()
+        cur.execute(Queries.useDatabase)
+        for insert in di.insertDefault():
+            cur.execute(insert)
+        
         db.commit()
 
         quit = "no"
         while quit == "no":
-            options = input("[1] CREATE | [2] USE | [3] DROP | [4] INSERT\nchoose:")
+            options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT\nchoose:"))
             match options:
                 case 1:
-                    cur.execute(q.createDatabase)
+                    cur.execute(Queries.createDatabase)
                 case 2: 
-                    cur.execute(q.useDatabase)
+                    cur.execute(Queries.useDatabase)
                 case 3:
-                    cur.execute(q.dropDatabase)
+                    cur.execute(Queries.dropDatabase)
+                case 4:
+                    print("options:\ncliente | prato | fornecedor | ingredientes | venda")
+                    table = input("choose the table you want to select: ")
 
+                    cur.execute(Queries.chooseSelect(table=table))
+                    for row in cur:
+                        print(row)
 
             quit = input("do you want to quit?\nyes | no\n")
         
