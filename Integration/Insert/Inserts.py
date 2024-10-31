@@ -1,5 +1,5 @@
-class DefaultInsert:
-
+class Inserts:
+        
     def insertDefault():
         insertDefaultCliente = """
             REPLACE INTO cliente (id_cliente, nome, sexo, idade, nascimento) VALUES 
@@ -69,4 +69,38 @@ class DefaultInsert:
         """
         insertList = (insertDefaultIngredientes, insertDefaultCliente, insertDefaultFornecedor, insertDefaultPrato, insertDefaultVenda)
         return insertList
-        
+
+    def newInsertCliente(nome, sexo, idade, nascimento):
+        result = f"""
+            INSERT INTO cliente (nome, sexo, idade, nascimento) VALUES
+            ('{nome}', '{sexo}', {idade}, '{nascimento}')
+        """
+        return result
+    
+    def newInsertPrato(nome, descricao, valor, disponibilidade):
+        result = f"""
+            INSERT INTO prato (nome, descricao, valor, disponibilidade) VALUES
+            ('{nome}', '{descricao}', {valor}, {disponibilidade})
+        """
+        return result
+
+    def newInsertVenda(id_cliente, id_prato, quantidade, dia, hora, valor):
+        result = f"""
+            INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor) VALUES
+            ({id_cliente}, {id_prato}, {quantidade}, '{dia}', '{hora}', {valor})
+        """
+        return result
+    
+    def newInsertFornecedor(nome, estado_origem):
+        result = f"""
+            INSERT INTO fornecedor (nome, estado_origem) VALUES
+            ('{nome}', '{estado_origem}')
+        """
+        return result
+    
+    def newInsertIngredientes(nome, data_fabricacao, data_validade, quantidade, observacao):
+        result = f"""
+            INSERT INTO ingredientes (nome, data_fabricacao, data_validade, quantidade, observacao) VALUES
+            ('{nome}', '{data_fabricacao}', '{data_validade}', {quantidade}, '{observacao}')
+        """
+        return result
