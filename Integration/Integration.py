@@ -1,7 +1,7 @@
 import mysql.connector
 from Query.Queries import Queries
 from Insert.Inserts import Inserts
-
+from CreateDataBase.ConstructDB import ConstructDB
 
 class Integration:
 
@@ -20,7 +20,21 @@ class Integration:
     else:
 
         cur = db.cursor()
-        cur.execute(Queries.useDatabase)
+        # cur.execute(Queries.useDatabase)
+        print("start database? ")
+        condition = input("yes | no\n")
+        if condition == "yes":
+            cur.execute(Queries.createDatabase)
+            cur.execute(Queries.useDatabase)
+        
+        cur.execute(ConstructDB.createDatabase, multi=True)
+        cur.execute(ConstructDB.createProcedureEstatisticas, multi=True)
+        cur.execute(ConstructDB.createProcedureGastarPontos, multi=True)
+        cur.execute(ConstructDB.createProcedureReajuste, multi=True)
+        cur.execute(ConstructDB.createProcedureSorteio, multi=True)
+        cur.execute(ConstructDB.createViews, multi=True)
+        cur.execute(ConstructDB.createUsers, multi=True)
+
         for insert in Inserts.insertDefault():
             cur.execute(insert)
         
