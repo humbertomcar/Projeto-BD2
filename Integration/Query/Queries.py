@@ -1,5 +1,4 @@
 class Queries:
-    
     createDatabase = "CREATE DATABASE IF NOT EXISTS Restaurante;"
     useDatabase = "USE Restaurante;"
     dropDatabase = "DROP DATABASE Restaurante;"
