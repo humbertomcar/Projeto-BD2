@@ -1,7 +1,13 @@
 class ConstructDB:
-    createDatabase = """
+    
+    createDatabase = "CREATE DATABASE IF NOT EXISTS Restaurante;"
+    useDatabase = "USE Restaurante;"
+    dropDatabase = "DROP DATABASE Restaurante;"
+
+    createCliente = """
+
         -- Tabela cliente
-        CREATE TABLE cliente (
+        CREATE TABLE IF NOT EXISTS cliente (
             id_cliente INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(50) NOT NULL,
             sexo ENUM('m', 'f', 'o') NOT NULL, -- Usando ENUM para sexo
@@ -9,18 +15,20 @@ class ConstructDB:
             nascimento DATE NOT NULL,
             pontos INT DEFAULT 0
         );
-
-        -- Tabela prato
-        CREATE TABLE prato (
+        """
+        
+    createPrato = """   -- Tabela prato
+        CREATE TABLE IF NOT EXISTS prato (
             id_prato INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(50) NOT NULL,
             descricao TEXT NOT NULL,
             valor DECIMAL(10, 2) NOT NULL,
             disponibilidade BOOLEAN NOT NULL -- Usando BOOLEAN diretamente
         );
-
-        -- Tabela fornecedor
-        CREATE TABLE fornecedor (
+        """
+        
+    createFornecedor = """-- Tabela fornecedor
+        CREATE TABLE IF NOT EXISTS fornecedor (
             id_fornecedor INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(50) NOT NULL,
             estado_origem CHAR(2) NOT NULL,
@@ -29,9 +37,10 @@ class ConstructDB:
                 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
             ))
         );
+        """
 
-        -- Tabela ingredientes
-        CREATE TABLE ingredientes (
+    createIngredientes = """-- Tabela ingredientes
+        CREATE TABLE IF NOT EXISTS ingredientes (
             id_ingrediente INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(50) NOT NULL,
             data_fabricacao DATE NOT NULL,
@@ -39,18 +48,20 @@ class ConstructDB:
             quantidade INT NOT NULL,
             observacao TEXT
         );
+        """
 
-        -- Tabela usos (relações entre prato e ingrediente)
-        CREATE TABLE usos (
+    createUsos = """        -- Tabela usos (relações entre prato e ingrediente)
+        CREATE TABLE IF NOT EXISTS usos (
             id_prato INT,
             id_ingrediente INT,
             PRIMARY KEY (id_prato, id_ingrediente),
             FOREIGN KEY (id_prato) REFERENCES prato(id_prato) ON DELETE CASCADE,
             FOREIGN KEY (id_ingrediente) REFERENCES ingredientes(id_ingrediente) ON DELETE CASCADE
         );
+        """
 
-        -- Tabela venda
-        CREATE TABLE venda (
+    createVenda = """        -- Tabela venda
+        CREATE TABLE IF NOT EXISTS venda (
             id_venda INT AUTO_INCREMENT PRIMARY KEY,
             id_cliente INT,
             id_prato INT,
@@ -60,9 +71,7 @@ class ConstructDB:
             valor DECIMAL(10, 2) NOT NULL,
             FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente) ON DELETE CASCADE,
             FOREIGN KEY (id_prato) REFERENCES prato(id_prato) ON DELETE CASCADE
-        );
-
-        SELECT * FROM prato;
+        );  
         """
     
     createViews = """
@@ -339,8 +348,15 @@ class ConstructDB:
         GRANT SELECT, INSERT ON Restaurante.* TO 'funcionario'@'localhost';
     """
 
+    def constructTables():
+
+        tableList = (ConstructDB.createCliente, ConstructDB.createFornecedor, ConstructDB.createIngredientes,   
+                     ConstructDB.createPrato, ConstructDB.createUsos, ConstructDB.createVenda)
+        return tableList
+
+    
     def construct():
-        componentsList = (ConstructDB.createDatabase, ConstructDB.createViews, ConstructDB.createProcedureSorteio,
+        componentsList = (ConstructDB.createViews, ConstructDB.createProcedureSorteio,
                           ConstructDB.createProcedureReajuste,ConstructDB.createProcedureGastarPontos,
                           ConstructDB.createProcedureEstatisticas, ConstructDB.createUsers)
 
