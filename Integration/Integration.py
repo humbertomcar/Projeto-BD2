@@ -20,23 +20,22 @@ class Integration:
     else:
 
         cur = db.cursor()
-        # cur.execute(Queries.useDatabase)
-        print("start database? ")
-        condition = input("yes | no\n")
-        if condition == "yes":
-            cur.execute(Queries.createDatabase)
-            cur.execute(Queries.useDatabase)
+        cur.execute(ConstructDB.createDatabase)
+        cur.execute(ConstructDB.useDatabase)
         
-        cur.execute(ConstructDB.createDatabase, multi=True)
-        cur.execute(ConstructDB.createProcedureEstatisticas, multi=True)
-        cur.execute(ConstructDB.createProcedureGastarPontos, multi=True)
-        cur.execute(ConstructDB.createProcedureReajuste, multi=True)
-        cur.execute(ConstructDB.createProcedureSorteio, multi=True)
-        cur.execute(ConstructDB.createViews, multi=True)
-        cur.execute(ConstructDB.createUsers, multi=True)
+        def bootstrap(cur):
+            
+            cur.execute(ConstructDB.createDatabase)
+            cur.execute(ConstructDB.useDatabase)
 
-        for insert in Inserts.insertDefault():
-            cur.execute(insert)
+            for table in ConstructDB.constructTables():
+                cur.execute(f"{table}")
+            for component in ConstructDB.construct():
+                cur.execute(f"{component}", multi=True)
+            for insert in Inserts.insertDefault():
+                cur.execute(f"{insert}")
+        
+        bootstrap(cur=cur)
         
         db.commit()
 
@@ -45,11 +44,12 @@ class Integration:
             options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT | [5] INSERT\nchoose:"))
             match options:
                 case 1:
-                    cur.execute(Queries.createDatabase)
+                    bootstrap(cur)
                 case 2: 
-                    cur.execute(Queries.useDatabase)
+                    cur.execute(ConstructDB.useDatabase)
+
                 case 3:
-                    cur.execute(Queries.dropDatabase)
+                    cur.execute(ConstructDB.dropDatabase)
                 case 4:
                     print("options:\ncliente | prato | fornecedor | ingredientes | venda")
                     table = input("choose the table you want to select: ")
@@ -108,7 +108,6 @@ class Integration:
                     
                     db.commit()
             quit = input("do you want to quit?\nyes | no\n")
-            
                     
         cur.close()
         db.close()
