@@ -123,13 +123,6 @@ class ConstructDB:
     """
 
     createProcedureReajuste = """
-        -- Inserindo apenas para testes
-        INSERT INTO prato (nome, descricao, valor, disponibilidade) 
-        VALUES 
-        ('Lasanha', 'Lasanha de carne', 30.00, TRUE),
-        ('Pizza', 'Pizza de quatro queijos', 25.00, TRUE),
-        ('Salada', 'Salada Caesar', 15.00, TRUE);
-
         -- Reajuste - Receba um reajuste em percentual e aumente o valor de todos os pratos.
         DELIMITER $$
 
@@ -143,10 +136,20 @@ class ConstructDB:
         DELIMITER ;
 
         -- Testando reajuste de 10%
-        CALL Reajuste(10);
+        CAL  -- Reajuste - Receba um reajuste em percentual e aumente o valor de todos os pratos.
+        DELIMITER $$
 
-        -- Verifica os valores atualizados
-        SELECT * FROM prato;
+        CREATE PROCEDURE Reajuste(IN reajuste_percentual DECIMAL(5, 2))
+        BEGIN
+            -- fazendo um aumento tomando como base o parametro dessa procedure (exemplo: caso o argumento seja 10, teria um aumento de 10%)
+            UPDATE prato 
+            SET valor = valor + (valor * (reajuste_percentual / 100));
+        END$$
+
+        DELIMITER ;
+
+        -- Testando reajuste de 10%
+        CALL Reajuste(10);L Reajuste(10);
     """
 
     createProcedureGastarPontos = """
@@ -203,10 +206,6 @@ class ConstructDB:
 
         -- test do procedimento Gastar_pontos
         CALL Gastar_pontos(1, 1);
-
-        -- ve o saldo de pontos do cliente após a compra
-        SELECT * FROM cliente;
-
     """
 
     createProcedureEstatisticas = """
@@ -317,24 +316,6 @@ class ConstructDB:
         DELIMITER ;
 
         CALL Estatisticas_Vendas();
-
-        -- Tabela cliente
-        SELECT * FROM cliente;
-
-        -- Tabela prato
-        SELECT * FROM prato;
-
-        -- Tabela fornecedor
-        SELECT * FROM fornecedor;
-
-        -- Tabela ingredientes
-        SELECT * FROM ingredientes;
-
-        -- Tabela usos (relações entre prato e ingrediente)
-        SELECT * FROM usos;
-
-        -- Tabela venda
-        SELECT * FROM venda;
     """
     
     createUsers = """
