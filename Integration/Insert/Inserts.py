@@ -42,17 +42,17 @@ class Inserts:
             (10, 'Importadora Gourmet', 'ES');
         """
         insertDefaultIngredientes = """
-            REPLACE INTO ingredientes (nome, data_fabricacao, data_validade, quantidade, observacao) VALUES 
-            ('Feijão', '2024-01-10', '2025-01-10', 100, 'Feijão carioca selecionado'),
-            ('Carne de Porco', '2024-02-15', '2024-08-15', 50, 'Carne fresca resfriada'),
-            ('Peixe', '2024-03-12', '2024-09-12', 30, 'Peixe congelado'),
-            ('Frango', '2024-05-18', '2024-11-18', 40, 'Frango caipira'),
-            ('Tomate', '2024-06-01', '2024-07-15', 70, 'Tomates orgânicos'),
-            ('Alface', '2024-06-05', '2024-07-10', 60, 'Alface crocante'),
-            ('Batata', '2024-07-22', '2024-12-22', 120, 'Batatas frescas'),
-            ('Ovo', '2024-08-11', '2024-10-11', 80, 'Ovos brancos grandes'),
-            ('Arroz', '2024-09-30', '2025-09-30', 150, 'Arroz integral'),
-            ('Picanha', '2024-10-15', '2025-04-15', 20, 'Picanha premium');
+            REPLACE INTO ingredientes (id_ingrediente, nome, data_fabricacao, data_validade, quantidade, observacao) VALUES 
+            (1, 'Feijão', '2024-01-10', '2025-01-10', 100, 'Feijão carioca selecionado'),
+            (2, 'Carne de Porco', '2024-02-15', '2024-08-15', 50, 'Carne fresca resfriada'),
+            (3,'Peixe', '2024-03-12', '2024-09-12', 30, 'Peixe congelado'),
+            (4, 'Frango', '2024-05-18', '2024-11-18', 40, 'Frango caipira'),
+            (5, 'Tomate', '2024-06-01', '2024-07-15', 70, 'Tomates orgânicos'),
+            (6, 'Alface', '2024-06-05', '2024-07-10', 60, 'Alface crocante'),
+            (7, 'Batata', '2024-07-22', '2024-12-22', 120, 'Batatas frescas'),
+            (8, 'Ovo', '2024-08-11', '2024-10-11', 80, 'Ovos brancos grandes'),
+            (9, 'Arroz', '2024-09-30', '2025-09-30', 150, 'Arroz integral'),
+            (10, 'Picanha', '2024-10-15', '2025-04-15', 20, 'Picanha premium');
         """
         insertDefaultVenda = """
             REPLACE INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor) VALUES 

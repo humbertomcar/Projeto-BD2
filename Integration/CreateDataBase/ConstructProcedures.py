@@ -3,7 +3,7 @@ class ConstructProcedures:
     dropProcedureSorteio = "DROP PROCEDURE IF EXISTS Sorteio;"
     dropProcedureEstatisticas = "DROP PROCEDURE IF EXISTS Estatisticas_Vendas;"
     dropProcedureReajuste = "DROP PROCEDURE IF EXISTS Reajuste;"
-    dropProcedureGastarPontos = ""
+    dropProcedureGastarPontos = "DROP PROCEDURE IF EXISTS Gastar_Pontos;"
 
     createProcedureEstatisticas = """
                 -- PROCEDURE ESTATISTICAS
@@ -105,8 +105,6 @@ class ConstructProcedures:
 
             SELECT * FROM resultado_estatisticas;
             
-            -- Limpando a tabela temporária
-            DROP TEMPORARY TABLE resultado_estatisticas;
         END
     """
 
@@ -125,12 +123,14 @@ class ConstructProcedures:
             -- pega o saldo de pontos do cliente
         SELECT pontos INTO pontos_cliente
         FROM cliente
-        WHERE id_cliente = id_cliente;
+        WHERE id_cliente = id_cliente
+        LIMIT 1;
 
         -- pega o valor do prato
         SELECT valor INTO valor_prato
         FROM prato
-        WHERE id_prato = id_prato;
+        WHERE id_prato = id_prato
+        LIMIT 1;
 
         -- calcula os pontos necessários para cobrir o valor do prato (1:1 em reais, arredondando para cima se necessário)
         SET pontos_utilizados = CEIL(valor_prato);
@@ -157,7 +157,7 @@ class ConstructProcedures:
                 SET MESSAGE_TEXT = 'Pontos insuficientes para completar a compra';
         END IF;
 
-        END$$
+        END
     """
 
 
@@ -192,3 +192,13 @@ class ConstructProcedures:
     END
     
     """
+
+    def dropProcedures():
+        dropProceduresList = (ConstructProcedures.dropProcedureEstatisticas, ConstructProcedures.dropProcedureGastarPontos,
+                              ConstructProcedures.dropProcedureReajuste, ConstructProcedures.dropProcedureSorteio)
+        return dropProceduresList
+
+    def createProcedures():
+        proceduresList = (ConstructProcedures.createProcedureEstatisticas, ConstructProcedures.createProcedureGastarPontos,
+                          ConstructProcedures.createProcedureReajuste, ConstructProcedures.createProcedureSorteio)
+        return proceduresList
