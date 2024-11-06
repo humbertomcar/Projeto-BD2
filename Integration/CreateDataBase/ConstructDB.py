@@ -91,25 +91,28 @@ class ConstructDB:
 
     
 
-    createUsers = """
+    createUserAdministrador = """
         CREATE USER IF NOT EXISTS 'administrador'@'localhost' IDENTIFIED BY '123';
         GRANT ALL ON Restaurante.* TO 'administrador'@'localhost';
-
+    """
+    createUserGerente = """
         CREATE USER IF NOT EXISTS 'gerente'@'localhost' IDENTIFIED BY '123';
         GRANT SELECT, UPDATE, DELETE ON Restaurante.* TO 'gerente'@'localhost';
+    """
 
+    createUserFuncionario = """
         CREATE USER IF NOT EXISTS 'funcionario'@'localhost' IDENTIFIED BY '123';
         GRANT SELECT, INSERT ON Restaurante.* TO 'funcionario'@'localhost';
     """
 
-    def constructTables():
+    safeUpdateDisable = "SET SQL_SAFE_UPDATES = 0;"
+
+    def createUsers():
+        usersList = (ConstructDB.createUserAdministrador, ConstructDB.createUserGerente, ConstructDB.createUserFuncionario)
+        return usersList
+
+    def createTables():
 
         tableList = (ConstructDB.createCliente, ConstructDB.createFornecedor, ConstructDB.createIngredientes,   
-                     ConstructDB.createPrato, ConstructDB.createUsos, ConstructDB.createVenda)
+                     ConstructDB.createPrato, ConstructDB.createUsos, ConstructDB.createVenda, ConstructDB.safeUpdateDisable)
         return tableList
-
-    
-    def construct():
-        componentsList = (ConstructDB.createViews, ConstructDB.createUsers)
-
-        return componentsList

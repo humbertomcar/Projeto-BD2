@@ -6,6 +6,7 @@ from CreateDataBase.ConstructProcedures import ConstructProcedures
 
 class Integration:
 
+    print("users:\nadministrador | gerente | funcionario")
     user = input("enter your database user: ")
     passwd = input("enter your databse password: ")
 
@@ -27,19 +28,20 @@ class Integration:
             cur.execute(ConstructDB.createDatabase)
             cur.execute(ConstructDB.useDatabase)
             
-            for table in ConstructDB.constructTables():
+            for user in ConstructDB.createUsers():
+                cur.execute(f"{user}", multi=True)
+            
+            for table in ConstructDB.createTables():
                 cur.execute(f"{table}")
             
-            cur.execute(ConstructProcedures.dropProcedureSorteio)
-            cur.execute(ConstructProcedures.createProcedureSorteio)
+            for dropProcedure in ConstructProcedures.dropProcedures():
+                cur.execute(f"{dropProcedure}")
 
-            # for component in ConstructDB.construct():
-            #     cur.execute(f"{component}", multi=True)
+            for procedure in ConstructProcedures.createProcedures():
+                cur.execute(f"{procedure}")
+
             for insert in Inserts.insertDefault():
                 cur.execute(f"{insert}")
-            
-
-        bootstrap(cur=cur)
         
         db.commit()
 
@@ -78,7 +80,7 @@ class Integration:
                             args = (
                                 input("enter nome: "),
                                 input("enter descricao: "),
-                                input("enter valor formato(XXXX.DD): "),
+                                input("enter valor formato(DECIMAL): "),
                                 input("enter disponibilidade formato(True, False): ")
                             )
                             cur.execute(Inserts.newInsertPrato(*args))
@@ -106,7 +108,7 @@ class Integration:
                                 input("enter quantidade: "),
                                 input("enter dia formato(YYYY-MM-DD): "),
                                 input("enter hora formato(HH:MM:SS): "),
-                                input("enter valor formato(XXXX.DD): ")
+                                input("enter valor formato(DECIMAL): ")
                             )
                             cur.execute(Inserts.newInsertVenda(*args))
                         case "usos":
@@ -117,26 +119,30 @@ class Integration:
                             cur.execute(Inserts.newInsertUsos(*args))
                     db.commit()
                 case 6:
-                    print("options:\n[1] Sorteio | [2] Estatisticas_Venda() | [3] Gastar_pontos(id_cliente, id_prato) | [4] Reajuste(XXXX.DD)")
-                    procedure = input("choose the procedure you want to use: ")
+                    print("options:\n[1] Sorteio() | [2] Estatisticas_Venda() | [3] Gastar_pontos(id_cliente, id_prato) | [4] Reajuste(DECIMAL)")
+                    procedure = int(input("choose the procedure you want to use: "))
 
                     match procedure:
                         case 1:
                             cur.callproc(Queries.callSorteio)
+
                         case 2:
                             cur.callproc(Queries.callEstatisticas)
+                            cur.execute("SELECT * FROM resultado_estatisticas")
                             for row in cur:
                                 print(row)
+                            cur.execute("DROP TEMPORARY TABLE resultado_estatisticas;")
+                        
                         case 3:
-
-                            idClient = input("enter id cliente: ")
-                            idPrato = input("enter id prato: ")
-
-                            cur.callproc(Queries.callGastarPontos(idCliente=idClient, idPrato=idPrato))
+                            args = (input("enter id cliente: "),
+                                    input("enter id prato: ")
+                                )
+                            cur.callproc("Gastar_Pontos", [*args])
+                        
                         case 4:
-                            numDecimal = input("enter decimal number (XXXXX.DD)")
+                            numDecimal = input("enter decimal number (INT): ")
 
-                            cur.callproc(Queries.callReajuste(numDecimal=numDecimal))
+                            cur.callproc('Reajuste', [numDecimal])
                     db.commit()
 
             quit = input("do you want to quit?\nyes | no\n")
