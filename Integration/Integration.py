@@ -2,6 +2,7 @@ import mysql.connector
 from Query.Queries import Queries
 from Insert.Inserts import Inserts
 from CreateDataBase.ConstructDB import ConstructDB
+from CreateDataBase.ConstructProcedures import ConstructProcedures
 
 class Integration:
 
@@ -20,28 +21,31 @@ class Integration:
     else:
 
         cur = db.cursor()
-        cur.execute(ConstructDB.createDatabase)
-        cur.execute(ConstructDB.useDatabase)
         
         def bootstrap(cur):
             
             cur.execute(ConstructDB.createDatabase)
             cur.execute(ConstructDB.useDatabase)
-
+            
             for table in ConstructDB.constructTables():
                 cur.execute(f"{table}")
-            for component in ConstructDB.construct():
-                cur.execute(f"{component}", multi=True)
+            
+            cur.execute(ConstructProcedures.dropProcedureSorteio)
+            cur.execute(ConstructProcedures.createProcedureSorteio)
+
+            # for component in ConstructDB.construct():
+            #     cur.execute(f"{component}", multi=True)
             for insert in Inserts.insertDefault():
                 cur.execute(f"{insert}")
-        
+            
+
         bootstrap(cur=cur)
         
         db.commit()
 
         quit = "no"
         while quit == "no":
-            options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT | [5] INSERT\nchoose:"))
+            options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT | [5] INSERT | [6] PROCEDURES\nchoose:"))
             match options:
                 case 1:
                     bootstrap(cur)
@@ -51,14 +55,14 @@ class Integration:
                 case 3:
                     cur.execute(ConstructDB.dropDatabase)
                 case 4:
-                    print("options:\ncliente | prato | fornecedor | ingredientes | venda")
+                    print("options:\ncliente | prato | fornecedor | ingredientes | venda | usos")
                     table = input("choose the table you want to select: ")
 
                     cur.execute(Queries.chooseSelect(table=table))
                     for row in cur:
                         print(row)
                 case 5:
-                    print("options:\ncliente | prato | fornecedor | ingredientes | venda")
+                    print("options:\ncliente | prato | fornecedor | ingredientes | venda | usos")
                     table = input("choose the table you want to insert: ")
                     
                     match table:
@@ -105,8 +109,36 @@ class Integration:
                                 input("enter valor formato(XXXX.DD): ")
                             )
                             cur.execute(Inserts.newInsertVenda(*args))
-                    
+                        case "usos":
+                            args = (
+                                input("enter id prato: "),
+                                input("enter id ingrediente: ")
+                            )
+                            cur.execute(Inserts.newInsertUsos(*args))
                     db.commit()
+                case 6:
+                    print("options:\n[1] Sorteio | [2] Estatisticas_Venda() | [3] Gastar_pontos(id_cliente, id_prato) | [4] Reajuste(XXXX.DD)")
+                    procedure = input("choose the procedure you want to use: ")
+
+                    match procedure:
+                        case 1:
+                            cur.callproc(Queries.callSorteio)
+                        case 2:
+                            cur.callproc(Queries.callEstatisticas)
+                            for row in cur:
+                                print(row)
+                        case 3:
+
+                            idClient = input("enter id cliente: ")
+                            idPrato = input("enter id prato: ")
+
+                            cur.callproc(Queries.callGastarPontos(idCliente=idClient, idPrato=idPrato))
+                        case 4:
+                            numDecimal = input("enter decimal number (XXXXX.DD)")
+
+                            cur.callproc(Queries.callReajuste(numDecimal=numDecimal))
+                    db.commit()
+
             quit = input("do you want to quit?\nyes | no\n")
                     
         cur.close()

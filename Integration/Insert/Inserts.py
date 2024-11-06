@@ -67,7 +67,11 @@ class Inserts:
             (9, 10, 2, '2024-10-09', '12:00:00', 80.00),
             (10, 4, 3, '2024-10-10', '17:30:00', 60.00);
         """
-        insertList = (insertDefaultIngredientes, insertDefaultCliente, insertDefaultFornecedor, insertDefaultPrato, insertDefaultVenda)
+        insertDefaultUsos = """
+            INSERT INTO usos (id_prato, id_ingrediente) VALUES
+            (1, 1), (1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 7), (4, 8), (5, 9), (5, 10);
+        """
+        insertList = (insertDefaultIngredientes, insertDefaultCliente, insertDefaultFornecedor, insertDefaultPrato, insertDefaultVenda, insertDefaultUsos)
         return insertList
 
     def newInsertCliente(nome, sexo, idade, nascimento):
@@ -102,5 +106,12 @@ class Inserts:
         result = f"""
             INSERT INTO ingredientes (nome, data_fabricacao, data_validade, quantidade, observacao) VALUES
             ('{nome}', '{data_fabricacao}', '{data_validade}', {quantidade}, '{observacao}')
+        """
+        return result
+    
+    def newInsertUsos(id_prato, id_ingrediente):
+        result = f"""
+            INSERT INTO usos (id_prato, id_ingrediente) VALUES
+            ({id_prato}, {id_ingrediente})
         """
         return result
