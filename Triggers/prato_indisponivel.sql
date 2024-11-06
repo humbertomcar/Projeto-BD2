@@ -6,7 +6,6 @@ CREATE TRIGGER VerificaDisponibilidade
 BEFORE INSERT ON venda
 FOR EACH ROW
 BEGIN
-    -- Verifica se o prato está disponível
 	DECLARE disp_prato BOOLEAN;
 
     -- Seleciona o valor de disponibilidade para o prato
@@ -15,7 +14,7 @@ BEGIN
     WHERE id_prato = NEW.id_prato;
 
     IF disp_prato = 0 THEN
-        -- Se o prato estiver indisponível, dispara o erro
+        -- Se o prato estiver indisponivel dispara o erro
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'O prato está indisponível, não é possível realizar a venda.';
     END IF;
