@@ -19,12 +19,12 @@ class Inserts:
             (1, 'Feijoada', 'Feijoada completa com carnes e acompanhamentos', 25.50, TRUE),
             (2, 'Moqueca de Peixe', 'Moqueca capixaba com peixe fresco', 32.00, TRUE),
             (3, 'Bife a Cavalo', 'Bife de carne com ovo frito', 22.00, TRUE),
-            (4, 'Strogonoff de Frango', 'Frango ao molho de strogonoff', 20.00, FALSE),
+            (4, 'Strogonoff de Frango', 'Frango ao molho de strogonoff', 20.00, TRUE),
             (5, 'Lasagna Bolonhesa', 'Lasagna com molho à bolonhesa', 28.50, TRUE),
             (6, 'Salada Caesar', 'Salada com alface, croutons e parmesão', 18.00, TRUE),
             (7, 'Sopa de Legumes', 'Sopa leve com legumes variados', 15.00, TRUE),
             (8, 'Pizza Marguerita', 'Pizza de queijo e tomate', 30.00, TRUE),
-            (9, 'Bacalhau à Brás', 'Bacalhau com batata e ovo', 35.00, FALSE),
+            (9, 'Bacalhau à Brás', 'Bacalhau com batata e ovo', 35.00, TRUE),
             (10, 'Picanha na Brasa', 'Picanha grelhada com acompanhamentos', 40.00, TRUE);
         """
 
@@ -41,6 +41,7 @@ class Inserts:
             (9, 'Fazenda Orgânica', 'GO'),
             (10, 'Importadora Gourmet', 'ES');
         """
+        
         insertDefaultIngredientes = """
             REPLACE INTO ingredientes (id_ingrediente, nome, data_fabricacao, data_validade, quantidade, observacao) VALUES 
             (1, 'Feijão', '2024-01-10', '2025-01-10', 100, 'Feijão carioca selecionado'),

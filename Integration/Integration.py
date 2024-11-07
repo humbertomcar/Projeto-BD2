@@ -40,14 +40,20 @@ class Integration:
             for procedure in ConstructProcedures.createProcedures():
                 cur.execute(f"{procedure}")
 
+            for view in ConstructDB.createViews():
+                cur.execute(f"{view}")
+
+            for trigger in ConstructDB.createTriggers():
+                cur.execute(f"{trigger}")
+            
             for insert in Inserts.insertDefault():
                 cur.execute(f"{insert}")
-        
+            
         db.commit()
 
         quit = "no"
         while quit == "no":
-            options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT | [5] INSERT | [6] PROCEDURES\nchoose:"))
+            options = int(input("[1] CREATE | [2] USE | [3] DROP | [4] SELECT | [5] INSERT | [6] PROCEDURES\nchoose: "))
             match options:
                 case 1:
                     bootstrap(cur)
@@ -57,7 +63,8 @@ class Integration:
                 case 3:
                     cur.execute(ConstructDB.dropDatabase)
                 case 4:
-                    print("options:\ncliente | prato | fornecedor | ingredientes | venda | usos")
+                    print("""options:\ncliente | prato | fornecedor | ingredientes | venda | usos
+VendasPorCliente | ClientesEVendas | TotalGastoPorCliente | ClienteComMaisVendas""")
                     table = input("choose the table you want to select: ")
 
                     cur.execute(Queries.chooseSelect(table=table))
