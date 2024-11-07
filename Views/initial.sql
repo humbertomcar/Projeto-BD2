@@ -26,18 +26,21 @@ GROUP BY
 
 SELECT * FROM TotalGastoPorCliente;
 
-CREATE VIEW ClientesEVendas AS
+CREATE VIEW ClientesComMaisPontos AS
 SELECT 
     c.nome AS nome_cliente,
-    COUNT(v.id_venda) AS total_vendas
+    c.pontos AS pontos_acumulados,
+    COUNT(v.id_venda) AS total_vendas,
+    SUM(v.valor) AS total_gasto
 FROM 
     cliente c
 JOIN 
     venda v ON c.id_cliente = v.id_cliente
 GROUP BY 
-    c.nome
+    c.nome, c.pontos
 ORDER BY 
-    c.nome ASC;
+    c.pontos DESC;
+
     
-Select * from ClientesEVendas;
+Select * from ClientesComMaisPontos;
 
