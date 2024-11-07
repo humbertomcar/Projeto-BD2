@@ -57,6 +57,7 @@ class Integration:
             match options:
                 case 1:
                     bootstrap(cur)
+                    db.commit()
                 case 2: 
                     cur.execute(ConstructDB.useDatabase)
 
