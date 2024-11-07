@@ -105,11 +105,126 @@ class ConstructDB:
         GRANT SELECT, INSERT ON Restaurante.* TO 'funcionario'@'localhost';
     """
 
+    createViewVendasPorCliente = """
+        CREATE VIEW IF NOT EXISTS VendasPorCliente AS
+        SELECT 
+            c.nome AS nome_cliente,
+            SUM(v.quantidade) AS total_vendas
+        FROM 
+            cliente c
+        JOIN 
+            venda v ON c.id_cliente = v.id_cliente
+        GROUP BY 
+            c.nome;
+    """
+    
+    createViewTotalGastoPorCliente = """
+        CREATE VIEW IF NOT EXISTS TotalGastoPorCliente AS
+        SELECT 
+            c.nome AS nome_cliente,
+            SUM(v.valor) AS total_gasto
+        FROM 
+            cliente c
+        JOIN 
+            venda v ON c.id_cliente = v.id_cliente
+        GROUP BY 
+            c.nome;
+    """
+
+    createViewClientesEVendas = """
+        CREATE VIEW IF NOT EXISTS ClientesEVendas AS
+        SELECT 
+            c.nome AS nome_cliente,
+            COUNT(v.id_venda) AS total_vendas
+        FROM 
+            cliente c
+        JOIN 
+            venda v ON c.id_cliente = v.id_cliente
+        GROUP BY 
+            c.nome
+        ORDER BY 
+            c.nome ASC;
+    """
+
+    createViewClienteComMaisVendas = """
+        CREATE VIEW IF NOT EXISTS ClientesComMaisPontos AS
+        SELECT 
+            c.nome AS nome_cliente,
+            c.pontos AS pontos_acumulados,
+            COUNT(v.id_venda) AS total_vendas,
+            SUM(v.valor) AS total_gasto
+        FROM 
+            cliente c
+        JOIN 
+            venda v ON c.id_cliente = v.id_cliente
+        GROUP BY 
+            c.nome, c.pontos
+        ORDER BY 
+            c.pontos DESC;
+    """
+
+    createTriggerReduzirIngredientes = """
+        CREATE TRIGGER IF NOT EXISTS reduzirIngredientes
+        AFTER INSERT ON venda
+        FOR EACH ROW
+        BEGIN
+
+            UPDATE ingredientes i
+            JOIN usos u ON i.id_ingrediente = u.id_ingrediente
+            SET i.quantidade = i.quantidade - (NEW.quantidade)
+            WHERE u.id_prato = NEW.id_prato;
+ 
+        END
+    """
+
+    createTriggerVerificaDisponibilidade = """
+        CREATE TRIGGER IF NOT EXISTS VerificaDisponibilidade
+        BEFORE INSERT ON venda
+        FOR EACH ROW
+        BEGIN
+            DECLARE disp_prato BOOLEAN;
+
+            -- Seleciona o valor de disponibilidade para o prato
+            SELECT disponibilidade INTO disp_prato 
+            FROM prato 
+            WHERE id_prato = NEW.id_prato;
+
+            IF disp_prato = 0 THEN
+                -- Se o prato estiver indisponivel dispara o erro
+                SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = 'O prato está indisponível, não é possível realizar a venda.';
+            END IF;
+        END
+    """
+
+    createTriggerAdicionaPontosCliente = """
+        CREATE TRIGGER IF NOT EXISTS adiciona_pontos_cliente
+        AFTER INSERT ON venda
+        FOR EACH ROW
+        BEGIN
+            -- atualiza os pontos do cliente quando a venda for acionada (1 ponto a cada 10 reais)
+            UPDATE cliente
+            SET pontos = pontos + FLOOR(NEW.valor / 10)
+            WHERE id_cliente = NEW.id_cliente;
+        END
+    """
+
+
+
     safeUpdateDisable = "SET SQL_SAFE_UPDATES = 0;"
+
+    def createTriggers():
+        triggersList = (ConstructDB.createTriggerAdicionaPontosCliente, ConstructDB.createTriggerReduzirIngredientes, ConstructDB.createTriggerVerificaDisponibilidade)
+        return triggersList
 
     def createUsers():
         usersList = (ConstructDB.createUserAdministrador, ConstructDB.createUserGerente, ConstructDB.createUserFuncionario)
         return usersList
+
+    def createViews():
+        userViewsList = (ConstructDB.createViewVendasPorCliente, ConstructDB.createViewClientesEVendas, ConstructDB.createViewTotalGastoPorCliente,
+                         ConstructDB.createViewClienteComMaisVendas)
+        return userViewsList
 
     def createTables():
 

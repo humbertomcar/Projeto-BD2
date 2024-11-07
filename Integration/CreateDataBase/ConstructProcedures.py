@@ -110,54 +110,45 @@ class ConstructProcedures:
 
     createProcedureGastarPontos = """
 
-        CREATE PROCEDURE Gastar_pontos(
-            IN id_cliente INT,
-            IN id_prato INT
-        )
+        CREATE PROCEDURE Gastar_pontos(IN id_cliente_input INT, IN id_prato_input INT)
         BEGIN
             DECLARE pontos_cliente INT;
             DECLARE valor_prato DECIMAL(10, 2);
-            DECLARE pontos_utilizados INT;
-            DECLARE pontos_restantes INT;
+            DECLARE pontos_necessarios INT;
+            DECLARE diferenca_pontos INT;
 
-            -- pega o saldo de pontos do cliente
-        SELECT pontos INTO pontos_cliente
-        FROM cliente
-        WHERE id_cliente = id_cliente
-        LIMIT 1;
+            -- Verifica os pontos do cliente
+            SELECT pontos INTO pontos_cliente
+            FROM cliente
+            WHERE id_cliente = id_cliente_input;
 
-        -- pega o valor do prato
-        SELECT valor INTO valor_prato
-        FROM prato
-        WHERE id_prato = id_prato
-        LIMIT 1;
+            -- Verifica o valor do prato
+            SELECT valor INTO valor_prato
+            FROM prato
+            WHERE id_prato = id_prato_input;
 
-        -- calcula os pontos necessários para cobrir o valor do prato (1:1 em reais, arredondando para cima se necessário)
-        SET pontos_utilizados = CEIL(valor_prato);
+            -- Calcula os pontos necessários para comprar o prato
+            SET pontos_necessarios = CEIL(valor_prato);
 
-            -- ve se o cliente possui pontos suficientes
-            IF pontos_cliente >= pontos_utilizados THEN
-                -- calcula os pontos restantes após a compra
-                SET pontos_restantes = pontos_cliente - pontos_utilizados;
+            -- Verifica se o cliente tem pontos suficientes
+            IF pontos_cliente >= pontos_necessarios THEN
+                -- Calcula a diferença de pontos se sobrar
+                SET diferenca_pontos = pontos_cliente - pontos_necessarios;
 
-                -- att o saldo de pontos do cliente
-        UPDATE cliente
-        SET pontos = pontos_restantes
-        WHERE id_cliente = id_cliente;
+                -- Atualiza os pontos do cliente
+                UPDATE cliente
+                SET pontos = diferenca_pontos
+                WHERE id_cliente = id_cliente_input;
 
-        -- registra a venda como uma compra realizada com pontos
-        INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor)
-        VALUES (id_cliente, id_prato, 1, CURDATE(), CURTIME(), 0);
-
-        -- mostra uma mensagem de confirmação e o saldo de pontos restantes
-        SELECT 'Compra realizada com sucesso' AS mensagem, pontos_restantes AS "Pontos Restantes";
-        ELSE
-                -- ae o cliente não tiver pontos suficientes, exibe uma mensagem de erro
+                -- Registra a venda (exemplo de registro)
+                INSERT INTO venda (id_cliente, id_prato, quantidade, dia, hora, valor)
+                VALUES (id_cliente_input, id_prato_input, 1, CURDATE(), CURTIME(), valor_prato);
+            ELSE
                 SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Pontos insuficientes para completar a compra';
-        END IF;
-
+                SET MESSAGE_TEXT = 'Pontos insuficientes para realizar a compra';
+            END IF;
         END
+
     """
 
 
